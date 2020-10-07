@@ -34,7 +34,7 @@ It is important to **NOT** treat this as a failure; the execution status is
 
 # LIMITS
 * The `/wapi/v3` `rateLimits` array contains objects related to the exchange's `REQUESTS` and `ORDER` rate limits.
-* A 429 will be returned when either rather limit is violated.
+* A 429 will be returned when either rate limit is violated.
 * Each route has a `weight` which determines for the number of requests each endpoint counts for. Heavier endpoints and endpoints that do operations on multiple symbols will have a heavier `weight`.
 * When a 429 is recieved, it's your obligation as an API to back off and not spam the API.
 * **Repeatedly violating rate limits and/or failing to back off after receiving 429s will result in an automated IP ban (http status 418).**
@@ -150,7 +150,8 @@ Submit a withdraw request.
 
 Name | Type | Mandatory | Description
 ------------ | ------------ | ------------ | ------------
-asset	|  STRING |	YES	
+asset	|  STRING |	YES
+network | STRING | NO
 address	 | STRING | YES	
 addressTag | STRING | NO | Secondary address identifier for coins like XRP,XMR etc.
 amount | DECIMAL | YES	
@@ -241,7 +242,8 @@ timestamp | LONG | YES
     "withdrawList": [
         {
             "id":"7213fea8e94b4a5593d507237e5a555b",
-            "amount": 1,
+            "amount": 0.99,
+	    "transactionFee": 0.01,
             "address": "0x6915f16f8791d0a1cc2bf47c13a6b2a92000504b",
             "asset": "ETH",
             "txId": "0xdf33b22bdb2b28b1f75ccd201a4a4m6e7g83jy5fc5d5a9d1340961598cfcb0a1",
@@ -250,7 +252,8 @@ timestamp | LONG | YES
         },
         {
             "id":"7213fea8e94b4a5534ggsd237e5a555b",
-            "amount": 1000,
+            "amount": 999.9999,
+	    "transactionFee": 0.0001,
             "address": "463tWEBn5XZJSxLU34r6g7h8jtxuNcDbjLSjkn3XAXHCbLrTTErJrBWYgHJQyrCwkNgYvyV3z8zctJLPCZy24jvb3NiTcTJ",
             "addressTag": "342341222",
             "txId": "b3c6219639c8ae3f9cf010cdc24fw7f7yt8j1e063f9b4bd1a05cb44c4b6e2509",
@@ -752,3 +755,96 @@ symbol | STRING | NO
 }
 ```
 
+### Dust Transfer (USER_DATA)
+```
+Post /sapi/v1/asset/dust (HMAC SHA256)
+```
+Convert dust assets to BNB.
+
+**Weight:**
+1
+
+**Parameters:**
+
+Name | Type | Mandatory | Description
+------------ | ------------ | ------------ | ------------
+asset | ARRAY | YES | The asset being converted. For example: asset=BTC&asset=USDT
+recvWindow | LONG | NO |
+timestamp | LONG | YES |
+
+
+**Response:**
+```javascript
+{
+    "totalServiceCharge":"0.02102542",
+    "totalTransfered":"1.05127099",
+    "transferResult":[
+        {
+            "amount":"0.03000000",
+            "fromAsset":"ETH",
+            "operateTime":1563368549307,
+            "serviceChargeAmount":"0.00500000",
+            "tranId":2970932918,
+            "transferedAmount":"0.25000000"
+        },
+        {
+            "amount":"0.09000000",
+            "fromAsset":"LTC",
+            "operateTime":1563368549404,
+            "serviceChargeAmount":"0.01548000",
+            "tranId":2970932918,
+            "transferedAmount":"0.77400000"
+        },
+        {
+            "amount":"248.61878453",
+            "fromAsset":"TRX",
+            "operateTime":1563368549489,
+            "serviceChargeAmount":"0.00054542",
+            "tranId":2970932918,
+            "transferedAmount":"0.02727099"
+        }
+    ]
+}
+```
+
+### Asset dividend record (USER_DATA)
+```
+Get /sapi/v1/asset/assetDividend (HMAC SHA256)
+```
+Query asset dividend record.
+
+**Weight:**
+1
+
+**Parameters:**
+
+Name | Type | Mandatory | Description
+------------ | ------------ | ------------ | ------------
+asset | STRING | NO |
+startTime | LONG | NO |
+endTime | LONG | NO |
+recvWindow | LONG | NO |
+timestamp | LONG | YES |
+
+**Response:**
+```javascript
+{
+    "rows":[
+        {
+            "amount":"10.00000000",
+            "asset":"BHFT",
+            "divTime":1563189166000,
+            "enInfo":"BHFT distribution",
+            "tranId":2968885920
+        },
+        {
+            "amount":"10.00000000",
+            "asset":"BHFT",
+            "divTime":1563189165000,
+            "enInfo":"BHFT distribution",
+            "tranId":2968885920
+        }
+    ],
+    "total":2
+}
+```

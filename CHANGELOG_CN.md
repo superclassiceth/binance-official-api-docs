@@ -1,4 +1,47 @@
-# 更新日志 (2018-11-13)
+# 更新日志 (2020-09-09)
+
+## 2020-09-09
+
+用户数据 STREAM
+
+* `outboundAccountInfo`事件不再推荐使用。
+* `outboundAccountInfo`事件以后会被删除(具体时间未定) **请使用 `outboundAccountPosition` 事件.**
+* `outboundAccountInfo`只推送余额不为0，以及余额刚变成0的资产。
+
+---
+
+## 2020-05-01
+* 从2020-05-01 UTC 00:00开始, 所有交易对都会有最多200个挂单的限制, 体现在过滤器[MAX_NUM_ORDERS](https://github.com/binance-exchange/binance-official-api-docs/blob/master/rest-api_CN.md#max_num_orders-%E6%9C%80%E5%A4%9A%E8%AE%A2%E5%8D%95%E6%95%B0)上.
+  * 已经存在的挂单不会被移除或者撤销。
+  * 单交易对(`symbol`)的挂单数量达到或超过200的账号, 无法在此交易对上下新的订单, 除非挂单数量低于200。
+  * OCO订单在被触发成`LIMIT`订单, 或者被触发成`STOP_LOSS`(或者`STOP_LOSS_LIMIT`)前, 被认为是2个挂单量. 一旦OCO订单被触发, 就只被算作一个挂单。
+
+---
+
+## 2020-04-23
+
+WEB SOCKET 连接限制
+
+* Websocket服务器每秒最多接受5个消息。消息包括:
+	* PING帧
+	* PONG帧
+	* JSON格式的消息, 比如订阅, 断开订阅.
+* 如果用户发送的消息超过限制，连接会被断开连接。反复被断开连接的IP有可能被服务器屏蔽。
+* 单个连接最多可以订阅 **1024** 个Streams。
+
+---
+## 2020-03-24
+
+* 添加过滤器 `MAX_POSITION`.
+    * 这个过滤器定义账户允许的基于`base asset`的最大仓位。一个用户的仓位可以定义为如下资产的总和:
+        * `base asset`的可用余额
+        * `base asset`的锁定余额
+        * 所有处于open的买单的数量总和
+
+    * 如果用户的仓位大于最大的允许仓位，买单会被拒绝。
+
+---
+
 ## 2018-11-13
 ### Rest API
   * 账户交易权限被禁时允许进行撤单操作。
@@ -70,5 +113,3 @@
   * GET /api/v3/account 权重改为 20
   * GET /api/v3/myTrades 权重改为 20
   * GET /api/v3/historicalTrades 权重改为 20
-
-
